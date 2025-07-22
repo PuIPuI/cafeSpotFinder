@@ -9,6 +9,7 @@
   <nav>
     <a href="../../search/index.html">Search</a>
     <a href="../../my-favorites/index.html">My Favorites</a>
+    <a href="../../my-reservations/index.html">Reservations</a>
     <a href="../../login/index.html">Login</a>
   </nav>
 </header>
@@ -228,7 +229,7 @@ nav a.active {
     form.onsubmit = function () {
       message.classList.remove("hidden");
       setTimeout(function () {
-        window.location.href = "../login/index.html";
+        window.location.href = "/register-user/index.html"";
       }, 2000);
       return false;
     }
@@ -242,6 +243,7 @@ function createNavigation(currentPage = '') {
             <nav>
                 <a href="${basePath}search/index.html" ${currentPage === 'search' ? 'class="active"' : ''}>Search</a>
                 <a href="${basePath}my-favorites/index.html" ${currentPage === 'favorites' ? 'class="active"' : ''}>My Favorites</a>
+                <a href="${basePath}my-reservations/index.html" ${currentPage === 'reservations' ? 'class="active"' : ''}>Reservations</a>
                 <a href="${basePath}login/index.html" ${currentPage === 'login' ? 'class="active"' : ''}>Login</a>
             </nav>
         </header>
