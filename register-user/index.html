@@ -4,85 +4,94 @@
   <meta charset="UTF-8">
   <title>Sign Up</title>
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+   <header>
+  <h1><a href="../../index.html">Cafe Spot Finder</a></h1>
+  <nav>
+    <a href="../../search/index.html">Search</a>
+    <a href="../../my-favorites/index.html">My Favorites</a>
+    <a href="../../login/index.html">Login</a>
+  </nav>
+</header>
   <style>
     /* Shared Navigation Styles */
-header {
-    background-color: #f5eadd;
-    padding: 16px 32px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: none !important;
-}
-
-header h1 {
-    font-size: 32px;
-    font-weight: 700;
-}
-
-header h1 a {
-    color: inherit;
-    text-decoration: none;
-}
-
-nav {
-    display: flex;
-    gap: 19px;
-}
-
-nav a {
-    font-family: 'Lexend', sans-serif;
-    font-weight: 500;
-    background-color: #d8bfa4;
-    padding: 8px 16px;
-    border-radius: 10px;
-    transition: background-color 0.3s ease;
-    font-size: 16px;
-    display: inline-block;
-    text-decoration: none;
-    color: inherit;
-}
-
-nav a:hover {
-    background-color: #c6a98c;
-    cursor: pointer;
-}
-
-nav a.active {
-    background-color: #a87544;
-    color: white;
-}
-
-/* Responsive design */
-@media (max-width: 768px) {
     header {
-        flex-direction: column;
-        gap: 16px;
-        padding: 16px;
+        background-color: #f5eadd;
+        padding: 16px 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: none !important;
     }
-    
-    nav {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 12px;
-    }
-    
-    nav a {
-        font-size: 14px;
-        padding: 6px 12px;
-    }
-    
+
     header h1 {
-        font-size: 24px;
+        font-size: 32px;
+        font-weight: 700;
     }
-}
+
+    header h1 a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    nav {
+        display: flex;
+        gap: 19px;
+    }
+
+    nav a {
+        font-family: 'Lexend', sans-serif;
+        font-weight: 500;
+        background-color: #d8bfa4;
+        padding: 8px 16px;
+        border-radius: 10px;
+        transition: background-color 0.3s ease;
+        font-size: 16px;
+        display: inline-block;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    nav a:hover {
+        background-color: #c6a98c;
+        cursor: pointer;
+    }
+
+    nav a.active {
+        background-color: #a87544;
+        color: white;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        header {
+            flex-direction: column;
+            gap: 16px;
+            padding: 16px;
+        }
+    
+        nav {
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        nav a {
+            font-size: 14px;
+            padding: 6px 12px;
+        }
+    
+        header h1 {
+            font-size: 24px;
+        }
+    }
+
     body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Lexend', sans-serif;
-  background-color: #fdf6f0;
-  color: #3b2f2f;
-}
+      margin: 0;
+      padding: 0;
+      font-family: 'Lexend', sans-serif;
+      background-color: #fdf6f0;
+      color: #3b2f2f;
+    }
 
     h2 {
       font-weight: 700;
@@ -167,21 +176,12 @@ nav a.active {
   </style>
 </head>
 <body>
-  <header>
-    <h1><a href="../index.html">Cafe Spot Finder</a></h1>
-    <nav>
-      <a href="../search/index.html">Search</a>
-      <a href="../my-favorites/index.html">My Favorites</a>
-      <a href="../login/index.html">Login</a>
-    </nav>
-  </header>
 
   <h2>Create Your Account</h2>
 
   <form id="signupForm">
-  <input type="email" id="email" placeholder="Email">
-<input type="password" id="password" placeholder="Password">
-
+    <input type="text" id="email" placeholder="Email">
+    <input type="text" id="password" placeholder="Password">
 
     <label>
       <input type="checkbox" id="terms"> I agree to the Terms and Conditions
@@ -227,58 +227,78 @@ nav a.active {
     termsCheckbox.onchange = checkFields;
 
     form.onsubmit = function () {
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!email || !password) return false;
+
+      // Load all user
+      let users = JSON.parse(localStorage.getItem("users") || "[]");
+
+      // Check email duplicate
+      const exists = users.find(u => u.email === email);
+      if (exists) {
+        alert("Email already registered. Try another one.");
+        return false;
+      }
+
+      // Add new user in to array
+      users.push({ email, password });
+
+      // Save to localStorage
+      localStorage.setItem("users", JSON.stringify(users));
+
       message.classList.remove("hidden");
       setTimeout(function () {
-        window.location.href = '../login/index.html';
+        window.location.href = "../login/index.html";
       }, 2000);
       return false;
     }
     // Shared Navigation Component
-function createNavigation(currentPage = '') {
-    const basePath = getBasePath();
-    
-    return `
-        <header>
-            <h1><a href="${basePath}index.html">Cafe Spot Finder</a></h1>
-            <nav>
-                <a href="${basePath}search/index.html" ${currentPage === 'search' ? 'class="active"' : ''}>Search</a>
-                <a href="${basePath}my-favorites/index.html" ${currentPage === 'favorites' ? 'class="active"' : ''}>My Favorites</a>
-                <a href="${basePath}my-reservations/index.html" ${currentPage === 'reservations' ? 'class="active"' : ''}>Reservations</a>
-                <a href="${basePath}login/index.html" ${currentPage === 'login' ? 'class="active"' : ''}>Login</a>
-            </nav>
-        </header>
-    `;
-}
-
-// Determine the base path based on current location
-function getBasePath() {
-    const path = window.location.pathname;
-    const depth = (path.match(/\//g) || []).length - 1;
-    
-    if (path.includes('/cafes/')) {
-        return '../../';
-    } else if (depth > 1) {
-        return '../';
-    } else {
-        return '';
-    }
-}
-
-// Load navigation into the page
-function loadNavigation(currentPage = '') {
-    document.addEventListener('DOMContentLoaded', function() {
-        const navigationHTML = createNavigation(currentPage);
+    function createNavigation(currentPage = '') {
+        const basePath = getBasePath();
         
-        // Find existing header or create one
-        let header = document.querySelector('header');
-        if (header) {
-            header.outerHTML = navigationHTML;
+        return `
+            <header>
+                <h1><a href="${basePath}index.html">Cafe Spot Finder</a></h1>
+                <nav>
+                    <a href="${basePath}search/index.html" ${currentPage === 'search' ? 'class="active"' : ''}>Search</a>
+                    <a href="${basePath}my-favorites/index.html" ${currentPage === 'favorites' ? 'class="active"' : ''}>My Favorites</a>
+                    <a href="${basePath}login/index.html" ${currentPage === 'login' ? 'class="active"' : ''}>Login</a>
+                </nav>
+            </header>
+        `;
+    }
+
+    // Determine the base path based on current location
+    function getBasePath() {
+        const path = window.location.pathname;
+        const depth = (path.match(/\//g) || []).length - 1;
+        
+        if (path.includes('/cafes/')) {
+            return '../../';
+        } else if (depth > 1) {
+            return '../';
         } else {
-            // Insert at the beginning of body
-            document.body.insertAdjacentHTML('afterbegin', navigationHTML);
+            return '';
         }
-    });
-}
+    }
+
+    // Load navigation into the page
+    function loadNavigation(currentPage = '') {
+        document.addEventListener('DOMContentLoaded', function() {
+            const navigationHTML = createNavigation(currentPage);
+            
+            // Find existing header or create one
+            let header = document.querySelector('header');
+            if (header) {
+                header.outerHTML = navigationHTML;
+            } else {
+                // Insert at the beginning of body
+                document.body.insertAdjacentHTML('afterbegin', navigationHTML);
+            }
+        });
+    }
 
 // Usage examples:
 // For main page: loadNavigation();
