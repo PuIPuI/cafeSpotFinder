@@ -102,6 +102,60 @@ select {
 .success {
   color: green;
 }
+
+.image-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.preview-item {
+  position: relative;
+  display: inline-block;
+}
+
+.preview-image {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #ddd;
+}
+
+.remove-image {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-image:hover {
+  background-color: #c82333;
+}
+
+input[type="file"] {
+  padding: 12px 16px;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+input[type="file"]:hover {
+  border-color: #a87544;
+}
     
   </style>
 </head>
@@ -200,6 +254,12 @@ select {
     <label for="confirmPassword">Confirm Password</label>
   </div>
   
+  <div class="form-group">
+    <input type="file" id="cafeImages" name="cafe-images" multiple accept="image/*" />
+    <label for="cafeImages">Cafe Images (Upload multiple images)</label>
+    <div id="imagePreview" class="image-preview"></div>
+  </div>
+  
       <div class="button-group">
         <button type="submit">Register</button>
       </div>
@@ -215,6 +275,155 @@ select {
             <a href="#">Contact Us</a>
         </div>
     </footer>
+
+    <script>
+        let uploadedImages = [];
+
+        // Handle image upload and preview
+        document.getElementById('cafeImages').addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            const imagePreview = document.getElementById('imagePreview');
+            
+            files.forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const imageData = {
+                            name: file.name,
+                            data: e.target.result,
+                            alt: `${document.getElementById('cafeName').value || 'Cafe'} - ${file.name}`
+                        };
+                        
+                        uploadedImages.push(imageData);
+                        
+                        // Create preview element
+                        const previewItem = document.createElement('div');
+                        previewItem.className = 'preview-item';
+                        previewItem.innerHTML = `
+                            <img src="${e.target.result}" alt="${file.name}" class="preview-image">
+                            <button type="button" class="remove-image" onclick="removeImage(${uploadedImages.length - 1})">×</button>
+                        `;
+                        
+                        imagePreview.appendChild(previewItem);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+
+        // Function to remove image from preview and array (global scope)
+        window.removeImage = function(index) {
+            uploadedImages.splice(index, 1);
+            refreshImagePreview();
+        }
+
+        // Refresh image preview display
+        function refreshImagePreview() {
+            const imagePreview = document.getElementById('imagePreview');
+            imagePreview.innerHTML = '';
+            
+            uploadedImages.forEach((image, index) => {
+                const previewItem = document.createElement('div');
+                previewItem.className = 'preview-item';
+                previewItem.innerHTML = `
+                    <img src="${image.data}" alt="${image.name}" class="preview-image">
+                    <button type="button" class="remove-image" onclick="removeImage(${index})">×</button>
+                `;
+                imagePreview.appendChild(previewItem);
+            });
+        }
+
+        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = {
+                name: document.getElementById('cafeName').value.trim(),
+                address: document.getElementById('address').value.trim(),
+                about: document.getElementById('description').value.trim(),
+                amenities: document.getElementById('amenities').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                website: document.getElementById('website').value.trim() || 'N/A',
+                hours: document.getElementById('hours').value.trim(),
+                totalSeats: parseInt(document.getElementById('seats').value),
+                totalOutlets: parseInt(document.getElementById('outlets').value),
+                noiseLevel: document.getElementById('noise').value,
+                ownerName: document.getElementById('ownerName').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                password: document.getElementById('password').value,
+                confirmPassword: document.getElementById('confirmPassword').value
+            };
+            
+            // Validate required fields
+            if (!formData.name || !formData.address || !formData.about || !formData.amenities || 
+                !formData.phone || !formData.hours || !formData.totalSeats || !formData.totalOutlets || 
+                !formData.noiseLevel || !formData.ownerName || !formData.email || !formData.password) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            // Validate password match
+            if (formData.password !== formData.confirmPassword) {
+                alert('Passwords do not match.');
+                return;
+            }
+            
+            // Generate unique cafe ID
+            const cafeId = 'cafe_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            
+            // Create cafe data object
+            const cafeData = {
+                id: cafeId,
+                name: formData.name,
+                address: formData.address,
+                phone: formData.phone,
+                hours: formData.hours,
+                website: formData.website,
+                about: formData.about,
+                amenities: formData.amenities,
+                status: {
+                    seats: { 
+                        available: Math.floor(formData.totalSeats * 0.7), // Assume 70% available
+                        total: formData.totalSeats 
+                    },
+                    outlets: { 
+                        available: Math.floor(formData.totalOutlets * 0.8), // Assume 80% available
+                        total: formData.totalOutlets 
+                    },
+                    noise: formData.noiseLevel.charAt(0).toUpperCase() + formData.noiseLevel.slice(1),
+                    lastUpdated: "Just now"
+                },
+                images: uploadedImages.length > 0 ? uploadedImages.map(img => ({
+                    src: img.data,
+                    alt: img.alt || `${formData.name} - ${img.name}`
+                })) : [
+                    { src: "../../assets/landing-bg.jpg", alt: formData.name + " Interior" },
+                    { src: "../../assets/landing-bg-2.png", alt: formData.name + " Exterior" },
+                    { src: "../../assets/landing-bg-3.png", alt: formData.name + " Menu" }
+                ],
+                owner: {
+                    name: formData.ownerName,
+                    email: formData.email
+                },
+                createdAt: new Date().toISOString(),
+                isOwnerRegistered: true
+            };
+            
+            // Save to localStorage
+            let registeredCafes = JSON.parse(localStorage.getItem('registeredCafes') || '{}');
+            registeredCafes[cafeId] = cafeData;
+            localStorage.setItem('registeredCafes', JSON.stringify(registeredCafes));
+            
+            // Show success message
+            document.getElementById('message').innerHTML = '<span class="success">✅ Cafe registered successfully!</span>';
+            document.getElementById('message').style.display = 'block';
+            
+            // Redirect to cafe detail page after 2 seconds
+            setTimeout(() => {
+                window.location.href = `../cafes/cafe_detail/index.html?id=${cafeId}`;
+            }, 2000);
+        });
+    </script>
   
 </body>
 </html>

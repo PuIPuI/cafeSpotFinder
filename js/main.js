@@ -65,11 +65,8 @@ cafes.push({
 });
 localStorage.setItem("cafes", JSON.stringify(cafes));
 
-// Redirect to fusettes.html after 1.5 seconds
-setTimeout(() => {
-  window.location.href = "fusettes.html";
-}, 1500);
-
+// Removed broken redirect to non-existent fusettes.html file
+});
 
 // Favorites
 document.addEventListener('DOMContentLoaded', () => {

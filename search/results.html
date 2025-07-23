@@ -68,11 +68,79 @@
     </footer>
 
     <script>
-    const allCafes = [
-        { id: 'bloom', name: 'Bloom Cafe', location: 'Yonge St', address: '596 Yonge St, Toronto, ON M4Y 1Z3', simulatedSeatsAvailable: 'Many Seats Available', simulatedNoiseLevel: 'Moderate', imageUrl: '../cafes/cafe_detail/Exterior.webp' },
-        { id: 'Good Earth', name: 'Good Earth Coffeehouse', location: 'Wellesley St', address: '8 Wellesley St E unit 102, Toronto, ON M4Y 3B2', simulatedSeatsAvailable: 'Many Seats Available', simulatedNoiseLevel: 'Quiet', imageUrl: '../cafes/cafe_detail/GoodE_exterior.webp' },
-        { id: 'Le Génie', name: 'Le Génie Bakery & Espresso', location: 'Yonge St', address: '382 Yonge St First Floor, Toronto, ON M5B 1S8', simulatedSeatsAvailable: 'Few Seats Left', simulatedNoiseLevel: 'Loud', imageUrl: '../cafes/cafe_detail/Le_exterior.webp' }
-    ];
+    // Load all cafes from localStorage (main cafes + registered cafes)
+    function getAllCafes() {
+        // Load main cafes data from localStorage
+        const mainCafesData = JSON.parse(localStorage.getItem('cafesData') || '{}');
+        const mainCafesList = Object.values(mainCafesData).map(cafe => {
+            // Determine seat availability status
+            const availableRatio = cafe.status.seats.available / cafe.status.seats.total;
+            let seatsStatus = 'No Seats Available';
+            if (availableRatio > 0.5) seatsStatus = 'Many Seats Available';
+            else if (availableRatio > 0.2) seatsStatus = 'Few Seats Left';
+            
+            // Extract location from address (assume first part before comma)
+            const location = cafe.address.split(',')[0] || 'Toronto';
+            
+            // Use the first image from the cafe's images array, or fallback to default
+            let imageUrl = '../assets/landing-bg.jpg'; // Default fallback
+            if (cafe.images && cafe.images.length > 0) {
+                // For main cafes, images have relative paths, so we need to prepend the cafe_detail path
+                const firstImage = cafe.images[0].src;
+                if (firstImage.startsWith('data:')) {
+                    // Base64 image (uploaded by owner)
+                    imageUrl = firstImage;
+                } else {
+                    // Relative path image (main cafes)
+                    imageUrl = `../cafes/cafe_detail/${firstImage}`;
+                }
+            }
+            
+            return {
+                id: cafe.id,
+                name: cafe.name,
+                location: location,
+                address: cafe.address,
+                simulatedSeatsAvailable: seatsStatus,
+                simulatedNoiseLevel: cafe.status.noise,
+                imageUrl: imageUrl
+            };
+        });
+        
+        // Add registered cafes from localStorage
+        const registeredCafes = JSON.parse(localStorage.getItem('registeredCafes') || '{}');
+        const registeredCafesList = Object.values(registeredCafes).map(cafe => {
+            // Determine seat availability status
+            const availableRatio = cafe.status.seats.available / cafe.status.seats.total;
+            let seatsStatus = 'No Seats Available';
+            if (availableRatio > 0.5) seatsStatus = 'Many Seats Available';
+            else if (availableRatio > 0.2) seatsStatus = 'Few Seats Left';
+            
+            // Extract location from address (assume first part before comma)
+            const location = cafe.address.split(',')[0] || 'Toronto';
+            
+            // Use the first image from the cafe's images array, or fallback to default
+            let imageUrl = '../assets/landing-bg.jpg'; // Default fallback
+            if (cafe.images && cafe.images.length > 0) {
+                // For registered cafes, images are already base64 or full URLs
+                imageUrl = cafe.images[0].src;
+            }
+            
+            return {
+                id: cafe.id,
+                name: cafe.name,
+                location: location,
+                address: cafe.address,
+                simulatedSeatsAvailable: seatsStatus,
+                simulatedNoiseLevel: cafe.status.noise,
+                imageUrl: imageUrl
+            };
+        });
+        
+        return [...mainCafesList, ...registeredCafesList];
+    }
+    
+    const allCafes = getAllCafes();
 
     const resultsHeading = document.getElementById('resultsHeading');
     const cafeListContainer = document.getElementById('cafeList');
